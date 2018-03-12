@@ -3,23 +3,22 @@ import PropTypes from 'prop-types';
 
 // defaultDequeueStrategy :: [Queue.Job] -> [Queue.Job]
 // where Queue.Job.payload ::= () -> any
+// Performs the function payload of each job in the queue,
+// then clears the queue.
 function defaultDequeueStrategy(queue) {
 	queue.forEach(({ payload, resolve }) => resolve(payload()));
 	return [];
 }
 
 /*
- * // Call `dequeue` when you want to dequeue jobs.
- * <Queue
- *   dequeueRef={dequeue => this.dequeue = dequeue}
- * >
- *   {request => (
- *     <div
- *       onMouseDown={evt => {
- *         request(evt => evt.target.getBoundingClientRect())
- *           .then(bounds => console.log(bounds))
- *       })}
- *     />
+ * <Queue>
+ *   {(enqueue, processAll) => (
+ *     <button onClick={() => enqueue(doWork)}>
+ *       Enqueue work
+ *     </button>
+ *     <button onClick={() => processAll()}>
+ *       Process all
+ *     </button>
  *   )}
  * </Queue>
  */
@@ -37,14 +36,20 @@ class Queue extends React.Component {
 			this.dequeue.bind(this);
 	}
 
-	// request :: Job -> Promise<*>
-	request(job) {
+	// request :: any -> Promise<*>
+	request(payload) {
 		return new Promise(resolve => {
-			this.queue.push({ payload: job, resolve });
+			this.queue.push({ payload, resolve });
 		});
 	}
 
 	// dequeue :: ([Job] -> [Job]) -> ()
+	// Performs the specified dequeue strategy on a non-empty queue,
+	// updating the queue to match the returned queue of `dequeueStrategy`.
+	// The dequeue strategy will usually have some side-effects from the
+	// removed jobs. (See `defaultDequeueStrategy` above for an example.)
+	// The dequeue strategy should also resolve the promises associated with
+	// each job.
 	dequeue(dequeueStrategy = defaultDequeueStrategy) {
 		if (this.queue.length === 0) {
 			return;
@@ -54,20 +59,10 @@ class Queue extends React.Component {
 		this.queue = [];
 	}
 
-	componentDidMount() {
-		if (this.props.dequeueRef != null) {
-			this.props.dequeueRef(this.dequeue);
-		}
-	}
-
 	render() {
 		return this.props.children(this.request, this.dequeue);
 	}
 }
-
-Queue.propTypes = {
-	dequeueRef: PropTypes.func,
-};
 
 export default Queue;
 

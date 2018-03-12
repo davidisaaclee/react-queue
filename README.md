@@ -2,27 +2,18 @@
 A simple job queue with a React component interface.
 
 ```javascript
-class MyBufferedComponent extends React.Component {
-  dequeue = null
-
-  componentDidMount() {
-    // Every 1000 ms, dequeue all queued tasks.
-    setInterval(
-      () => this.dequeue && this.dequeue(),
-      1000);
-  }
-
-  render() {
-    return (
-      <Queue dequeueRef={dequeue => this.dequeue = dequeue}>
-        {enqueue => (
-          <button onClick={() => enqueue(doWork)} />
-        )}
-      </Queue>
-    );
-  }
-}
-
+const BufferedWork = ({ doWork }) => (
+  <Queue>
+    {(enqueue, processAll) => (
+      <button onClick={() => enqueue(doWork)}>
+        Enqueue work
+      </button>
+      <button onClick={() => processAll()}>
+        Process all
+      </button>
+    )}
+  </Queue>
+);
 ```
 
 ## Installation
