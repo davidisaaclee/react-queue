@@ -55,8 +55,7 @@ class Queue extends React.Component {
 			return;
 		}
 
-		dequeueStrategy(this.queue);
-		this.queue = [];
+		this.queue = dequeueStrategy(this.queue);
 	}
 
 	render() {

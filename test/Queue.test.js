@@ -51,7 +51,7 @@ test('Dequeue in render', () => {
 });
 
 test('Custom dequeue strategy', () => {
-	expect.assertions(2);
+	expect.assertions(4);
 
 	let dequeue;
 	let enqueue;
@@ -80,18 +80,37 @@ test('Custom dequeue strategy', () => {
 	});
 	expect(job2Promise).resolves.toEqual(30);
 
+	const job3Promise = enqueue({
+		type: 'invalid-job'
+	});
+	const job3ReturnValue = 999;
+	expect(job3Promise).resolves.toBe(job3ReturnValue);
+
 	dequeue(jobs => {
-		function processJob({ payload, resolve }) {
+		function processJob(job) {
+			const { payload, resolve } = job;
 			const { type, ...args } = payload;
 
 			if (type === 'add') {
 				resolve(args.leftAddend + args.rightAddend);
+				return null;
 			} else if (type === 'multiply') {
 				resolve(args.leftMultiplicand * args.rightMultiplicand);
+				return null;
+			} else {
+				return job;
 			}
 		}
 
-		jobs.forEach(processJob);
+		return jobs
+			.map(processJob)
+			.filter(x => x != null);
+	});
+
+	// Job 3 should now be only job in queue.
+	dequeue(jobs => {
+		expect(jobs.length).toEqual(1);
+		jobs.forEach(job => job.resolve(job3ReturnValue));
 		return [];
 	});
 });
