@@ -61,7 +61,7 @@ class Queue extends React.Component {
 	}
 
 	render() {
-		return this.props.children(this.request);
+		return this.props.children(this.request, this.dequeue);
 	}
 }
 
