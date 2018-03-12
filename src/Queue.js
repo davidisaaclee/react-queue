@@ -55,7 +55,9 @@ class Queue extends React.Component {
 	}
 
 	componentDidMount() {
-		this.props.dequeueRef(this.dequeue);
+		if (this.props.dequeueRef != null) {
+			this.props.dequeueRef(this.dequeue);
+		}
 	}
 
 	render() {
@@ -64,7 +66,7 @@ class Queue extends React.Component {
 }
 
 Queue.propTypes = {
-	dequeueRef: PropTypes.func.isRequired,
+	dequeueRef: PropTypes.func,
 };
 
 export default Queue;
