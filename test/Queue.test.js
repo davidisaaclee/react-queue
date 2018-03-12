@@ -49,3 +49,50 @@ test('Dequeue in render', () => {
 	expect(job).toHaveBeenCalledTimes(3);
 	job.mockClear();
 });
+
+test('Custom dequeue strategy', () => {
+	expect.assertions(2);
+
+	let dequeue;
+	let enqueue;
+
+	const wrapper = shallow(
+		<Queue>
+			{(enq, deq) => {
+				enqueue = enq;
+				dequeue = deq;
+			}}
+		</Queue>
+	);
+
+	// Job payloads don't need to be functions.
+	const job1Promise = enqueue({
+		type: 'add',
+		leftAddend: 3,
+		rightAddend: 4
+	});
+	expect(job1Promise).resolves.toEqual(7);
+
+	const job2Promise = enqueue({
+		type: 'multiply',
+		leftMultiplicand: 3,
+		rightMultiplicand: 10
+	});
+	expect(job2Promise).resolves.toEqual(30);
+
+	dequeue(jobs => {
+		function processJob({ payload, resolve }) {
+			const { type, ...args } = payload;
+
+			if (type === 'add') {
+				resolve(args.leftAddend + args.rightAddend);
+			} else if (type === 'multiply') {
+				resolve(args.leftMultiplicand * args.rightMultiplicand);
+			}
+		}
+
+		jobs.forEach(processJob);
+		return [];
+	});
+});
+
