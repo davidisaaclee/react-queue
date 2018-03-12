@@ -3,24 +3,24 @@ A simple job queue with a React component interface.
 
 ```javascript
 class MyBufferedComponent extends React.Component {
-	dequeue = null
+  dequeue = null
 
-	componentDidMount() {
-		// Every 1000 ms, dequeue all queued tasks.
-		setInterval(
-			() => this.dequeue && this.dequeue(),
-			1000);
-	}
+  componentDidMount() {
+    // Every 1000 ms, dequeue all queued tasks.
+    setInterval(
+      () => this.dequeue && this.dequeue(),
+      1000);
+  }
 
-	render() {
-		return (
-			<Queue dequeueRef={dequeue => this.dequeue = dequeue}>
-				{enqueue => (
-					<button onClick={() => enqueue(doWork)} />
-				)}
-			</Queue>
-		);
-	}
+  render() {
+    return (
+      <Queue dequeueRef={dequeue => this.dequeue = dequeue}>
+        {enqueue => (
+          <button onClick={() => enqueue(doWork)} />
+        )}
+      </Queue>
+    );
+  }
 }
 
 ```
